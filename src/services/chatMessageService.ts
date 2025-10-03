@@ -143,6 +143,10 @@ export class ChatMessageService {
                         effectiveProvider = 'openrouter';
                     } else if (specificModel.startsWith('claude-')) {
                         effectiveProvider = 'anthropic';
+                    } else if (specificModel.startsWith('gemini')) {
+                        effectiveProvider = 'gemini';
+                    } else if (specificModel.startsWith('mistral') || specificModel.startsWith('mixtral') || specificModel.startsWith('open-mistral')) {
+                        effectiveProvider = 'mistral';
                     } else {
                         effectiveProvider = 'openai';
                     }
@@ -160,6 +164,14 @@ export class ChatMessageService {
                     case 'claude-code':
                         providerName = 'Claude Code';
                         configureCommand = 'workbench.action.openSettings';
+                        break;
+                    case 'gemini':
+                        providerName = 'Gemini';
+                        configureCommand = 'superdesign.configureGeminiApiKey';
+                        break;
+                    case 'mistral':
+                        providerName = 'Mistral';
+                        configureCommand = 'superdesign.configureMistralApiKey';
                         break;
                     case 'openai':
                         providerName = 'OpenAI';

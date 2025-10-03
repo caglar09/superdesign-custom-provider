@@ -1274,6 +1274,14 @@ export function activate(context: vscode.ExtensionContext) {
 		await configureOpenRouterApiKey();
 	});
 
+	const configureGeminiApiKeyDisposable = vscode.commands.registerCommand('superdesign.configureGeminiApiKey', async () => {
+		await configureGeminiApiKey();
+	});
+
+	const configureMistralApiKeyDisposable = vscode.commands.registerCommand('superdesign.configureMistralApiKey', async () => {
+		await configureMistralApiKey();
+	});
+
   const configureOpenAIUrlDisposable = vscode.commands.registerCommand('superdesign.configureOpenAIUrl', async () => {
     await configureOpenAIUrl();
   });
@@ -1395,6 +1403,8 @@ export function activate(context: vscode.ExtensionContext) {
 		configureApiKeyDisposable,
 		configureOpenAIApiKeyDisposable,
 		configureOpenRouterApiKeyDisposable,
+		configureGeminiApiKeyDisposable,
+		configureMistralApiKeyDisposable,
     configureOpenAIUrlDisposable,
 		sidebarDisposable,
 		showSidebarDisposable,
@@ -1533,6 +1543,78 @@ async function configureOpenRouterApiKey() {
 				vscode.window.showInformationMessage('✅ OpenRouter API key configured successfully!');
 			} catch (error) {
 				vscode.window.showErrorMessage(`Failed to save API key: ${error}`);
+			}
+		} else if (currentKey) {
+			vscode.window.showInformationMessage('API key unchanged (already configured)');
+		} else {
+			vscode.window.showWarningMessage('No API key was set');
+		}
+	}
+}
+
+// Function to configure Gemini API key
+async function configureGeminiApiKey() {
+	const currentKey = vscode.workspace.getConfiguration('superdesign').get<string>('geminiApiKey');
+
+	const input = await vscode.window.showInputBox({
+		title: 'Configure Gemini API Key',
+		prompt: 'Enter your Google Gemini API key (get one from https://aistudio.google.com/apikey)',
+		value: currentKey ? '••••••••••••••••' : '',
+		password: true,
+		placeHolder: 'AIza...'
+	});
+
+	if (input !== undefined) {
+		if (input !== '••••••••••••••••') {
+			if (!input || input.trim().length === 0) {
+				vscode.window.showErrorMessage('API key cannot be empty');
+				return;
+			}
+			try {
+				await vscode.workspace.getConfiguration('superdesign').update(
+					'geminiApiKey',
+					input.trim(),
+					vscode.ConfigurationTarget.Global
+				);
+				vscode.window.showInformationMessage('✅ Gemini API key configured successfully!');
+			} catch (error) {
+				vscode.window.showErrorMessage(`Failed to save Gemini API key: ${error}`);
+			}
+		} else if (currentKey) {
+			vscode.window.showInformationMessage('API key unchanged (already configured)');
+		} else {
+			vscode.window.showWarningMessage('No API key was set');
+		}
+	}
+}
+
+// Function to configure Mistral API key
+async function configureMistralApiKey() {
+	const currentKey = vscode.workspace.getConfiguration('superdesign').get<string>('mistralApiKey');
+
+	const input = await vscode.window.showInputBox({
+		title: 'Configure Mistral API Key',
+		prompt: 'Enter your Mistral API key (get one from https://console.mistral.ai/)',
+		value: currentKey ? '••••••••••••••••' : '',
+		password: true,
+		placeHolder: 'sk-...'
+	});
+
+	if (input !== undefined) {
+		if (input !== '••••••••••••••••') {
+			if (!input || input.trim().length === 0) {
+				vscode.window.showErrorMessage('API key cannot be empty');
+				return;
+			}
+			try {
+				await vscode.workspace.getConfiguration('superdesign').update(
+					'mistralApiKey',
+					input.trim(),
+					vscode.ConfigurationTarget.Global
+				);
+				vscode.window.showInformationMessage('✅ Mistral API key configured successfully!');
+			} catch (error) {
+				vscode.window.showErrorMessage(`Failed to save Mistral API key: ${error}`);
 			}
 		} else if (currentKey) {
 			vscode.window.showInformationMessage('API key unchanged (already configured)');
@@ -1928,4 +2010,3 @@ function getNonce() {
 export function deactivate() {
 	Logger.dispose();
 }
-

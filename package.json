@@ -69,6 +69,16 @@
         "category": "Superdesign"
       },
       {
+        "command": "superdesign.configureGeminiApiKey",
+        "title": "Configure Gemini API Key",
+        "category": "Superdesign"
+      },
+      {
+        "command": "superdesign.configureMistralApiKey",
+        "title": "Configure Mistral API Key",
+        "category": "Superdesign"
+      },
+      {
         "command": "superdesign.showChatSidebar",
         "title": "Show Chat Sidebar",
         "category": "Superdesign"
@@ -147,11 +157,15 @@
           "type": "string",
           "enum": [
             "claude-api",
-            "claude-code"
+            "claude-code",
+            "gemini-api",
+            "mistral-api"
           ],
           "enumDescriptions": [
             "Use Anthropic API key to communicate with Claude via SDK",
-            "Use local claude binary for enhanced code execution capabilities"
+            "Use local claude binary for enhanced code execution capabilities",
+            "Use Google Gemini REST API",
+            "Use Mistral chat completions API"
           ],
           "default": "claude-api",
           "description": "Choose the LLM provider to use for AI interactions",
@@ -200,16 +214,40 @@
           "description": "OpenRouter API key for custom agent",
           "scope": "application"
         },
+        "superdesign.geminiApiKey": {
+          "type": "string",
+          "description": "Google Gemini API key for custom agent or Gemini provider",
+          "scope": "application"
+        },
+        "superdesign.geminiModel": {
+          "type": "string",
+          "default": "gemini-1.5-pro-latest",
+          "description": "Gemini model identifier to use when Gemini provider is selected",
+          "scope": "application"
+        },
+        "superdesign.mistralApiKey": {
+          "type": "string",
+          "description": "Mistral API key for custom agent or Mistral provider",
+          "scope": "application"
+        },
+        "superdesign.mistralModel": {
+          "type": "string",
+          "default": "mistral-large-latest",
+          "description": "Mistral model identifier to use when Mistral provider is selected",
+          "scope": "application"
+        },
         "superdesign.aiModelProvider": {
           "type": "string",
           "enum": [
             "openai",
             "anthropic",
             "openrouter",
-            "claude-code"
+            "claude-code",
+            "gemini",
+            "mistral"
           ],
           "default": "anthropic",
-          "description": "AI model provider for custom agent (OpenAI, Anthropic, OpenRouter, or Claude Code - Note: Claude Code should be used via the main LLM Provider setting instead)",
+          "description": "AI model provider for custom agent (OpenAI, Anthropic, OpenRouter, Claude Code, Gemini, or Mistral - Note: Claude Code should be used via the main LLM Provider setting instead)",
           "scope": "application"
         },
         "superdesign.aiModel": {

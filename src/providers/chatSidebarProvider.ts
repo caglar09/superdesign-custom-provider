@@ -109,6 +109,12 @@ export class ChatSidebarProvider implements vscode.WebviewViewProvider {
             case 'openrouter':
                 defaultModel = 'anthropic/claude-3-7-sonnet-20250219';
                 break;
+            case 'gemini':
+                defaultModel = 'gemini-1.5-pro-latest';
+                break;
+            case 'mistral':
+                defaultModel = 'mistral-large-latest';
+                break;
             case 'anthropic':
             default:
                 defaultModel = 'claude-3-5-sonnet-20241022';
@@ -138,6 +144,16 @@ export class ChatSidebarProvider implements vscode.WebviewViewProvider {
                 apiKeyKey = 'openrouterApiKey';
                 configureCommand = 'superdesign.configureOpenRouterApiKey';
                 displayName = `OpenRouter (${this.getModelDisplayName(model)})`;
+            } else if (model.startsWith('gemini')) {
+                provider = 'gemini';
+                apiKeyKey = 'geminiApiKey';
+                configureCommand = 'superdesign.configureGeminiApiKey';
+                displayName = `Gemini (${this.getModelDisplayName(model)})`;
+            } else if (model.startsWith('mistral') || model.startsWith('mixtral') || model.startsWith('open-mistral')) {
+                provider = 'mistral';
+                apiKeyKey = 'mistralApiKey';
+                configureCommand = 'superdesign.configureMistralApiKey';
+                displayName = `Mistral (${this.getModelDisplayName(model)})`;
             } else if (model.startsWith('claude-')) {
                 provider = 'anthropic';
                 apiKeyKey = 'anthropicApiKey';
@@ -335,9 +351,21 @@ export class ChatSidebarProvider implements vscode.WebviewViewProvider {
             'inflection/inflection-3-productivity': 'Inflection 3 Productivity',
             'inflection/inflection-3-pi': 'Inflection 3 Pi',
             'rekaai/reka-flash-3': 'Reka Flash 3',
-            'openrouter/auto': 'Auto (Best Available)'
+            'openrouter/auto': 'Auto (Best Available)',
+            // Direct Gemini models
+            'gemini-1.5-pro-latest': 'Gemini 1.5 Pro',
+            'gemini-1.5-flash-latest': 'Gemini 1.5 Flash',
+            'gemini-2.0-flash': 'Gemini 2.0 Flash',
+            'gemini-2.0-flash-lite': 'Gemini 2.0 Flash Lite',
+            'gemini-2.5-pro': 'Gemini 2.5 Pro',
+            // Direct Mistral models
+            'mistral-large-latest': 'Mistral Large',
+            'mistral-medium-latest': 'Mistral Medium',
+            'mistral-small-latest': 'Mistral Small',
+            'open-mistral-7b': 'Open Mistral 7B',
+            'open-mixtral-8x7b': 'Open Mixtral 8x7B'
         };
-        
+
         return modelNames[model] || model;
     }
-} 
+}

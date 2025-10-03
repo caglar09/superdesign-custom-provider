@@ -2,6 +2,8 @@ import * as vscode from 'vscode';
 import { LLMProvider, LLMProviderType } from './llmProvider';
 import { ClaudeApiProvider } from './claudeApiProvider';
 import { ClaudeCodeProvider } from './claudeCodeProvider';
+import { GeminiApiProvider } from './geminiApiProvider';
+import { MistralApiProvider } from './mistralApiProvider';
 import { Logger } from '../services/logger';
 
 export class LLMProviderFactory {
@@ -55,6 +57,12 @@ export class LLMProviderFactory {
             
             case LLMProviderType.CLAUDE_CODE:
                 return new ClaudeCodeProvider(this.outputChannel);
+
+            case LLMProviderType.GEMINI_API:
+                return new GeminiApiProvider(this.outputChannel);
+
+            case LLMProviderType.MISTRAL_API:
+                return new MistralApiProvider(this.outputChannel);
             
             default:
                 throw new Error(`Unknown provider type: ${providerType}`);
@@ -69,6 +77,10 @@ export class LLMProviderFactory {
         switch (providerType.toLowerCase()) {
             case 'claude-code':
                 return LLMProviderType.CLAUDE_CODE;
+            case 'gemini-api':
+                return LLMProviderType.GEMINI_API;
+            case 'mistral-api':
+                return LLMProviderType.MISTRAL_API;
             case 'claude-api':
             default:
                 return LLMProviderType.CLAUDE_API;
@@ -114,6 +126,16 @@ export class LLMProviderFactory {
                 type: LLMProviderType.CLAUDE_CODE,
                 name: 'Claude Code Binary',
                 description: 'Uses local claude-code binary for enhanced code execution capabilities'
+            },
+            {
+                type: LLMProviderType.GEMINI_API,
+                name: 'Gemini API',
+                description: 'Uses Google Gemini REST API for design assistance'
+            },
+            {
+                type: LLMProviderType.MISTRAL_API,
+                name: 'Mistral API',
+                description: 'Uses Mistral chat completions API for design assistance'
             }
         ];
     }
@@ -137,6 +159,12 @@ export class LLMProviderFactory {
                         break;
                     case LLMProviderType.CLAUDE_CODE:
                         errorMessage = 'Claude Code binary is not available. Please install claude-code CLI tool.';
+                        break;
+                    case LLMProviderType.GEMINI_API:
+                        errorMessage = 'Gemini API key is required for Gemini provider';
+                        break;
+                    case LLMProviderType.MISTRAL_API:
+                        errorMessage = 'Mistral API key is required for Mistral provider';
                         break;
                 }
                 

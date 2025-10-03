@@ -1,6 +1,7 @@
 import { streamText, CoreMessage } from 'ai';
 import { createOpenAI } from '@ai-sdk/openai';
 import { createAnthropic } from '@ai-sdk/anthropic';
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 import * as vscode from 'vscode';
 import * as path from 'path';
@@ -23,6 +24,8 @@ export class CustomAgentService implements AgentService {
     private outputChannel: vscode.OutputChannel;
     private isInitialized = false;
     private claudeCodeService: ClaudeCodeService;
+    private lastProvider: string | null = null;
+    private lastModelId: string | null = null;
 
     constructor(outputChannel: vscode.OutputChannel) {
         this.outputChannel = outputChannel;
@@ -98,11 +101,18 @@ export class CustomAgentService implements AgentService {
                 effectiveProvider = 'openrouter';
             } else if (specificModel.startsWith('claude-')) {
                 effectiveProvider = 'anthropic';
+            } else if (specificModel.startsWith('gemini')) {
+                effectiveProvider = 'gemini';
+            } else if (specificModel.startsWith('mistral') || specificModel.startsWith('mixtral') || specificModel.startsWith('open-mistral')) {
+                effectiveProvider = 'mistral';
             } else {
                 effectiveProvider = 'openai';
             }
         }
-        
+
+        this.lastProvider = effectiveProvider;
+        this.lastModelId = null;
+
         switch (effectiveProvider) {
             case 'openrouter':
                 const openrouterKey = config.get<string>('openrouterApiKey');
@@ -119,6 +129,7 @@ export class CustomAgentService implements AgentService {
                 // Use specific model if available, otherwise default to Claude 3.7 Sonnet via OpenRouter
                 const openrouterModel = specificModel || 'anthropic/claude-3-7-sonnet-20250219';
                 this.outputChannel.appendLine(`Using OpenRouter model: ${openrouterModel}`);
+                this.lastModelId = openrouterModel;
                 return openrouter.chat(openrouterModel);
                 
             case 'anthropic':
@@ -140,6 +151,7 @@ export class CustomAgentService implements AgentService {
                 // Use specific model if available, otherwise default to claude-3-5-sonnet
                 const anthropicModel = specificModel || 'claude-3-5-sonnet-20241022';
                 this.outputChannel.appendLine(`Using Anthropic model: ${anthropicModel}`);
+                this.lastModelId = anthropicModel;
                 return anthropic(anthropicModel);
                 
             case 'claude-code':
@@ -167,7 +179,56 @@ export class CustomAgentService implements AgentService {
                 // Use specific model if available, otherwise default to gpt-4o
                 const openaiModel = specificModel || 'gpt-4o';
                 this.outputChannel.appendLine(`Using OpenAI model: ${openaiModel}`);
+                this.lastModelId = openaiModel;
                 return openai(openaiModel);
+
+            case 'gemini':
+                const geminiKey = config.get<string>('geminiApiKey');
+                if (!geminiKey) {
+                    throw new Error('Gemini API key not configured. Please run "Configure Gemini API Key" command.');
+                }
+
+                this.outputChannel.appendLine(`Gemini API key found: ${geminiKey.substring(0, 8)}...`);
+
+                const geminiProvider = createGoogleGenerativeAI({
+                    apiKey: geminiKey
+                });
+
+                const configuredGeminiModel = config.get<string>('geminiModel') || 'gemini-1.5-pro-latest';
+                const geminiModel = specificModel || configuredGeminiModel;
+                this.outputChannel.appendLine(`Using Gemini model: ${geminiModel}`);
+                this.lastModelId = geminiModel;
+                return geminiProvider(geminiModel);
+
+            case 'mistral':
+                const mistralKey = config.get<string>('mistralApiKey');
+                if (!mistralKey) {
+                    throw new Error('Mistral API key not configured. Please run "Configure Mistral API Key" command.');
+                }
+
+                this.outputChannel.appendLine(`Mistral API key found: ${mistralKey.substring(0, 8)}...`);
+
+                const mistralDefaultModel = config.get<string>('mistralModel') || 'mistral-large-latest';
+                const mistralModel = specificModel || mistralDefaultModel;
+                this.outputChannel.appendLine(`Using Mistral model: ${mistralModel}`);
+
+                const mistralProvider = createOpenAI({
+                    apiKey: mistralKey,
+                    baseURL: 'https://api.mistral.ai/v1'
+                });
+
+                this.lastModelId = mistralModel;
+                return mistralProvider(mistralModel);
+        }
+    }
+
+    private getMaxTokensForCurrentProvider(): number | undefined {
+        switch (this.lastProvider) {
+            case 'mistral':
+                this.outputChannel.appendLine('Skipping maxTokens for Mistral provider to avoid API Bad Request errors');
+                return undefined;
+            default:
+                return 32000;
         }
     }
 
@@ -188,6 +249,12 @@ export class CustomAgentService implements AgentService {
                     break;
                 case 'openrouter':
                     modelName = 'anthropic/claude-3-7-sonnet-20250219';
+                    break;
+                case 'gemini':
+                    modelName = 'gemini-1.5-pro-latest';
+                    break;
+                case 'mistral':
+                    modelName = 'mistral-large-latest';
                     break;
                 case 'claude-code':
                     modelName = 'claude-code';
@@ -676,9 +743,13 @@ I've created the html design, please reveiw and let me know if you need any chan
                 system: this.getSystemPrompt(),
                 tools: tools,
                 toolCallStreaming: true,
-                maxSteps: 10, // Enable multi-step reasoning with tools
-                maxTokens: 32000 // Increased from 8192 to prevent truncation issues
+                maxSteps: 10 // Enable multi-step reasoning with tools
             };
+
+            const maxTokens = this.getMaxTokensForCurrentProvider();
+            if (typeof maxTokens === 'number') {
+                streamTextConfig.maxTokens = maxTokens;
+            }
             
             if (usingConversationHistory) {
                 // Use conversation messages
@@ -953,6 +1024,10 @@ I've created the html design, please reveiw and let me know if you need any chan
                 effectiveProvider = 'openrouter';
             } else if (specificModel.startsWith('claude-')) {
                 effectiveProvider = 'anthropic';
+            } else if (specificModel.startsWith('gemini')) {
+                effectiveProvider = 'gemini';
+            } else if (specificModel.startsWith('mistral') || specificModel.startsWith('mixtral') || specificModel.startsWith('open-mistral')) {
+                effectiveProvider = 'mistral';
             } else {
                 effectiveProvider = 'openai';
             }
@@ -965,6 +1040,10 @@ I've created the html design, please reveiw and let me know if you need any chan
                 return !!config.get<string>('anthropicApiKey');
             case 'claude-code':
                 return true; // Claude Code doesn't require an API key
+            case 'gemini':
+                return !!config.get<string>('geminiApiKey');
+            case 'mistral':
+                return !!config.get<string>('mistralApiKey');
             case 'openai':
             default:
                 return !!config.get<string>('openaiApiKey');

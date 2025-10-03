@@ -29,12 +29,16 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ selectedModel, onModelCha
         { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet', provider: 'Anthropic', category: 'Balanced' },
         // Google (OpenRouter)
         { id: 'google/gemini-2.5-pro', name: 'Gemini 2.5 Pro', provider: 'OpenRouter (Google)', category: 'Balanced' },
+        { id: 'gemini-1.5-pro-latest', name: 'Gemini 1.5 Pro', provider: 'Gemini', category: 'Balanced' },
+        { id: 'gemini-1.5-flash-latest', name: 'Gemini 1.5 Flash', provider: 'Gemini', category: 'Fast' },
         // Meta (OpenRouter)
         { id: 'meta-llama/llama-4-maverick-17b-128e-instruct', name: 'Llama 4 Maverick 17B', provider: 'OpenRouter (Meta)', category: 'Balanced' },
         // DeepSeek (OpenRouter)
         { id: 'deepseek/deepseek-r1', name: 'DeepSeek R1', provider: 'OpenRouter (DeepSeek)', category: 'Balanced' },
         // Mistral (OpenRouter)
         { id: 'mistralai/mistral-small-3.2-24b-instruct-2506', name: 'Mistral Small 3.2 24B', provider: 'OpenRouter (Mistral)', category: 'Balanced' },
+        { id: 'mistral-large-latest', name: 'Mistral Large', provider: 'Mistral', category: 'Balanced' },
+        { id: 'mistral-small-latest', name: 'Mistral Small', provider: 'Mistral', category: 'Fast' },
         // xAI (OpenRouter)
         { id: 'x-ai/grok-3', name: 'Grok 3', provider: 'OpenRouter (xAI)', category: 'Balanced' },
         // Qwen (OpenRouter)
